@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAE Fingerprint Detection | Thesis Project</title>
+  <meta name="description" content="Investigating CNN detection of diffusion-model facial edits and the discovery of the VAE decoder fingerprint.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==================== NAV ==================== -->
+  <nav class="nav">
+    <div class="container">
+      <a href="#" class="nav-logo">
+        <span class="logo-dot"></span>
+        VAE Fingerprint
+      </a>
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#discovery">Findings</a></li>
+        <li><a href="#tech">Technologies</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero section" id="hero">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+    </div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge reveal">
+          <span class="pulse"></span>
+          TU Dublin · AI/ML Thesis 2025
+        </div>
+        <h1 class="hero-title reveal reveal-delay-1">
+          Local Diffusion Edits in Facial Images:
+          <span class="gradient-text">Detection and
+Explainability with CNNs.</span>
+        </h1>
+        <p class="hero-description reveal reveal-delay-2">
+          An investigation into whether CNN-based image classifiers can detect localised
+          facial edits produced by diffusion model inpainting, and the finding that they
+          learn a VAE decoder fingerprint rather than genuine edit artefacts.
+        </p>
+        <div class="hero-cta reveal reveal-delay-3">
+          <a href="#discovery" class="btn btn-primary">Key Findings</a>
+          <a href="#results" class="btn btn-ghost">View Results</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ==================== PROBLEM ==================== -->
+  <section class="problem section" id="problem">
+    <div class="container">
+      <span class="section-label reveal">01 // The Problem</span>
+      <h2 class="section-title reveal reveal-delay-1">Detecting localised facial edits from diffusion models</h2>
+      <p class="section-subtitle reveal reveal-delay-2">
+        Diffusion models can make subtle, localised changes to a face, such as adjusting lip colour,
+        reshaping hair, or altering skin tone. These edits are difficult to identify through visual
+        inspection alone. This project investigates whether CNN-based classifiers can reliably detect them.
+      </p>
+      <div class="problem-grid">
+        <div class="problem-visual reveal">
+          <!-- Rotating face carousel -->
+          <div class="face-carousel" id="faceCarousel">
+            <div class="face-pair active" data-pair="0">
+              <div class="face-card">
+                <img src="images/faces/pair1_real.png" alt="Original face (subject 35)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair1_edited.png" alt="Edited face (subject 35, upper lip)">
+                <div class="label edited">Edited (upper lip)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="1">
+              <div class="face-card">
+                <img src="images/faces/pair2_real.png" alt="Original face (subject 79)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair2_edited.png" alt="Edited face (subject 79, upper lip)">
+                <div class="label edited">Edited (upper lip)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="2">
+              <div class="face-card">
+                <img src="images/faces/pair3_real.png" alt="Original face (subject 114)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair3_edited.png" alt="Edited face (subject 114, nose)">
+                <div class="label edited">Edited (nose)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="3">
+              <div class="face-card">
+                <img src="images/faces/pair4_real.png" alt="Original face (subject 130)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair4_edited.png" alt="Edited face (subject 130, lower lip)">
+                <div class="label edited">Edited (lower lip)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="4">
+              <div class="face-card">
+                <img src="images/faces/pair5_real.png" alt="Original face (subject 137)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair5_edited.png" alt="Edited face (subject 137, nose)">
+                <div class="label edited">Edited (nose)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="5">
+              <div class="face-card">
+                <img src="images/faces/pair6_real.png" alt="Original face (subject 152)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair6_edited.png" alt="Edited face (subject 152, lower lip)">
+                <div class="label edited">Edited (lower lip)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="6">
+              <div class="face-card">
+                <img src="images/faces/pair7_real.png" alt="Original face (subject 109)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair7_edited.png" alt="Edited face (subject 109, right ear)">
+                <div class="label edited">Edited (right ear)</div>
+              </div>
+            </div>
+            <div class="face-pair" data-pair="7">
+              <div class="face-card">
+                <img src="images/faces/pair8_real.png" alt="Original face (subject 169)">
+                <div class="label real">Original</div>
+              </div>
+              <div class="face-card">
+                <img src="images/faces/pair8_edited.png" alt="Edited face (subject 169, right ear)">
+                <div class="label edited">Edited (right ear)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Carousel controls -->
+          <div class="carousel-controls">
+            <button class="carousel-btn" id="carouselPrev" aria-label="Previous pair">&larr;</button>
+            <div class="carousel-dots" id="carouselDots">
+              <button class="carousel-dot active" data-index="0" aria-label="Pair 1"></button>
+              <button class="carousel-dot" data-index="1" aria-label="Pair 2"></button>
+              <button class="carousel-dot" data-index="2" aria-label="Pair 3"></button>
+              <button class="carousel-dot" data-index="3" aria-label="Pair 4"></button>
+              <button class="carousel-dot" data-index="4" aria-label="Pair 5"></button>
+              <button class="carousel-dot" data-index="5" aria-label="Pair 6"></button>
+              <button class="carousel-dot" data-index="6" aria-label="Pair 7"></button>
+              <button class="carousel-dot" data-index="7" aria-label="Pair 8"></button>
+            </div>
+            <button class="carousel-btn" id="carouselNext" aria-label="Next pair">&rarr;</button>
+          </div>
+
+          <div class="face-challenge">
+            <p>Each pair shows the same individual before and after editing. The modifications are difficult to identify through visual inspection.</p>
+          </div>
+        </div>
+
+        <div class="problem-text reveal reveal-delay-1">
+          <h3>Motivation</h3>
+          <p>
+            Modern latent diffusion models (Stable Diffusion, SDXL, OpenJourney, Kandinsky)
+            use inpainting and prompt-to-prompt (P2P) techniques to produce hyper-realistic
+            local edits. These edits pass through a VAE decoder, leaving no visible trace to
+            the human eye.
+          </p>
+          <p>
+            This project trained four CNN architectures on the
+            <strong>Semi-Truths</strong> dataset to classify faces as real or edited.
+            Initial results showed near-perfect accuracy, but further experiments
+            revealed that the models were not detecting edits at all.
+          </p>
+          <ul class="problem-points">
+            <li>
+              <span class="icon">1</span>
+              <span>Edits are localised to tiny facial regions (lips, ears, hair, nose)</span>
+            </li>
+            <li>
+              <span class="icon">2</span>
+              <span>Multiple diffusion pipelines and edit techniques tested</span>
+            </li>
+            <li>
+              <span class="icon">3</span>
+              <span>All pipelines share a common component: the VAE decoder</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ==================== RESULTS ==================== -->
+  <section class="results section" id="results">
+    <div class="container">
+      <span class="section-label reveal">02 // Results</span>
+      <h2 class="section-title reveal reveal-delay-1">In-domain performance and cross-domain evaluation</h2>
+      <p class="section-subtitle reveal reveal-delay-2">
+        Four architectures were trained on CelebA-HQ inpainting data. Three achieved perfect classification
+        on the in-domain test set. However, cross-domain evaluation reveals a significant gap between
+        apparent performance and genuine edit detection capability.
+      </p>
+
+      <div class="results-stats">
+        <div class="stat-card reveal">
+          <div class="stat-value perfect" data-target="100" data-suffix="%">0%</div>
+          <div class="stat-label">In-Domain Accuracy</div>
+          <div class="stat-sublabel">3 of 4 models</div>
+        </div>
+        <div class="stat-card reveal reveal-delay-1">
+          <div class="stat-value highlight" data-target="99.9" data-suffix="%">0%</div>
+          <div class="stat-label">Cross-Technique (P2P)</div>
+          <div class="stat-sublabel">DenseNet121 best</div>
+        </div>
+        <div class="stat-card reveal reveal-delay-2">
+          <div class="stat-value failing" data-target="56" data-suffix="%">0%</div>
+          <div class="stat-label">Cross-Domain Accuracy</div>
+          <div class="stat-sublabel">Near random chance</div>
+        </div>
+        <div class="stat-card reveal reveal-delay-3">
+          <div class="stat-value amber" data-target="4" data-suffix="">0</div>
+          <div class="stat-label">CNN Architectures</div>
+          <div class="stat-sublabel">Tested &amp; compared</div>
+        </div>
+      </div>
+
+      <div class="results-narrative">
+        <div class="result-block reveal">
+          <div class="result-block-header">
+            <h3>Generalisation across domains</h3>
+            <p>
+              Models trained on face inpainting maintain high accuracy on face P2P edits
+              (same VAE fingerprint), but accuracy drops to near-random on non-face domains,
+              indicating the models did not learn generalisable edit detection.
+            </p>
+          </div>
+          <img src="images/results/cross_domain_progression.png"
+               alt="Accuracy progression from in-domain to cross-technique to cross-domain"
+               class="zoomable" loading="lazy">
+        </div>
+
+        <div class="result-block reveal reveal-delay-1">
+          <div class="result-block-header">
+            <h3>In-domain confusion matrix</h3>
+            <p>
+              DenseNet121 achieves a 501/489 split on in-domain data with AUC = 1.0 and zero
+              misclassifications.
+            </p>
+          </div>
+          <img src="images/results/confusion_roc.png"
+               alt="DenseNet121 confusion matrix and ROC curve showing perfect in-domain performance"
+               class="zoomable" loading="lazy">
+        </div>
+
+        <div class="result-block reveal">
+          <div class="result-block-header">
+            <h3>Cross-Domain Heatmap</h3>
+            <p>
+              DenseNet121 recall across 5 non-face image domains (ADE20K, CityScapes, HumanParsing,
+              OpenImages, SUN_RGBD) and two edit techniques.
+            </p>
+          </div>
+          <img src="images/results/cross_domain_heatmap.png"
+               alt="DenseNet121 recall heatmap across domains and techniques"
+               class="zoomable" loading="lazy">
+        </div>
+
+        <div class="result-block reveal reveal-delay-1">
+          <div class="result-block-header">
+            <h3>Cross-Domain Accuracy</h3>
+            <p>
+              All four models collapse to ~55-62% on non-face images, barely above
+              the 50% baseline of random guessing, confirming that facial-edit detection
+              did not generalise.
+            </p>
+          </div>
+          <img src="images/results/cross_domain_overall.png"
+               alt="Cross-domain accuracy and AUC-ROC for all four models"
+               class="zoomable" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ==================== DISCOVERY ==================== -->
+  <section class="discovery section" id="discovery">
+    <div class="container">
+      <span class="section-label reveal">03 // Findings</span>
+      <h2 class="section-title reveal reveal-delay-1">Evidence for VAE decoder fingerprint detection</h2>
+      <p class="section-subtitle reveal reveal-delay-2">
+        Despite near-perfect in-domain accuracy, multiple lines of evidence indicate that the classifiers
+        did not learn to detect facial edits. Instead, they learned to identify a frequency-domain
+        fingerprint introduced by the VAE decoder, a component common to all latent diffusion pipelines.
+      </p>
+
+      <!-- Pipeline diagram -->
+      <div class="pipeline reveal reveal-delay-3">
+        <div class="pipeline-step">
+          <span class="step-icon">TXT</span>
+          <span class="step-name">Text Prompt</span>
+          <span class="step-detail">"change lip colour"</span>
+        </div>
+        <span class="pipeline-arrow">&rarr;</span>
+        <div class="pipeline-step">
+          <span class="step-icon">NET</span>
+          <span class="step-name">U-Net</span>
+          <span class="step-detail">Denoising</span>
+        </div>
+        <span class="pipeline-arrow">&rarr;</span>
+        <div class="pipeline-step vae-step">
+          <span class="step-icon">VAE</span>
+          <span class="step-name">VAE Decoder</span>
+          <span class="step-detail">Leaves fingerprint</span>
+        </div>
+        <span class="pipeline-arrow">&rarr;</span>
+        <div class="pipeline-step">
+          <span class="step-icon">IMG</span>
+          <span class="step-name">Output Image</span>
+          <span class="step-detail">Looks identical</span>
+        </div>
+      </div>
+
+      <div class="discovery-flow">
+        <!-- Evidence 1: Edit area bins -->
+        <div class="discovery-step reveal">
+          <div class="discovery-text">
+            <span class="step-number">Evidence 01</span>
+            <h3>Performance is independent of edit area</h3>
+            <p>
+              The Semi-Truths dataset categorises each edit by the percentage of the image that was
+              actually modified. Edits range from <strong>tiny</strong> (&lt;1% of pixels, like a lip
+              or ear) to <strong>large</strong> (20-60%, like a full hair restyle). If the models were
+              truly detecting the edited pixels, performance should degrade as the edit region shrinks:
+              a 0.5% lip edit should be far harder to find than a 50% hair swap.
+            </p>
+            <p>
+              However, the models classified tiny edits with the same confidence as large ones.
+              A CNN classifying a 0.5% upper lip modification with 100% confidence raises questions
+              about what signal the model is actually responding to. This suggests the classifier is
+              not attending to the edited region itself, but to a property that affects the entire
+              image regardless of edit size.
+            </p>
+            <div class="insight-box">
+              <span class="insight-label">Insight</span>
+              <p>The VAE fingerprint is present across the entire image, not just at the edit site.
+              This is why even sub-1% edits are classified with perfect confidence: the model is
+              responding to a full-image signal, not the tiny edited region.</p>
+            </div>
+          </div>
+          <div class="discovery-visual">
+            <img src="images/results/confusion_roc.png"
+                 alt="Perfect confusion matrix and ROC curve despite tiny edit regions"
+                 class="zoomable" loading="lazy">
+            <p class="img-caption">DenseNet121: perfect 501/489 classification on a dataset dominated by
+              tiny and small edits, suggesting the model relies on a signal unrelated to edit size.</p>
+          </div>
+        </div>
+
+        <!-- Evidence 2: Cross-technique success -->
+        <div class="discovery-step reverse reveal">
+          <div class="discovery-text">
+            <span class="step-number">Evidence 02</span>
+            <h3>Cross-technique generalisation</h3>
+            <p>
+              The models were trained exclusively on <strong>inpainting</strong> edits, where a masked
+              region is regenerated. They were then evaluated on <strong>prompt-to-prompt</strong> (P2P)
+              edits, a fundamentally different editing technique that uses attention manipulation to
+              guide the diffusion process rather than masking.
+            </p>
+            <p>
+              Despite never encountering P2P edits during training, DenseNet121 achieved 99.9% accuracy
+              on P2P test data. Both inpainting and P2P share the same diffusion pipeline, meaning the
+              edited images in both cases pass through the same VAE decoder. The models were not
+              generalising across editing techniques; they were responding to the same VAE fingerprint
+              present in both.
+            </p>
+            <p>
+              This distinction is important. The learned signal is not tied to <em>how</em> an edit
+              was performed, but to the fact that the image was processed by a particular decoder. Any
+              image that passes through that pipeline acquires the same artefact, regardless of the
+              editing method used.
+            </p>
+          </div>
+          <div class="discovery-visual">
+            <img src="images/results/cross_domain_progression.png"
+                 alt="Accuracy remains high for cross-technique but collapses for cross-domain"
+                 class="zoomable" loading="lazy">
+            <p class="img-caption">Generalisation progression: in-domain to cross-technique to
+              cross-domain. Same VAE decoders throughout, but accuracy collapses on unfamiliar image content.</p>
+          </div>
+        </div>
+        <!-- Evidence 3: Cross-domain collapse -->
+        <div class="discovery-step reveal">
+          <div class="discovery-text">
+            <span class="step-number">Evidence 03</span>
+            <h3>Cross-domain evaluation</h3>
+            <p>
+              The models trained on CelebA-HQ faces were then evaluated on five different image domains
+              from the Semi-Truths dataset: ADE20K (scenes), CityScapes (urban), HumanParsing (body
+              segmentation), OpenImages (general objects), and SUN_RGBD (indoor environments). These
+              non-face images were also edited using diffusion model inpainting and P2P.
+            </p>
+            <p>
+              If the models had learned to detect genuine edit artefacts (blending seams, texture
+              inconsistencies, colour shifts), that capability should transfer across domains. However,
+              accuracy fell to 55-62% across all four architectures, only marginally above the 50%
+              random-chance baseline.
+            </p>
+            <p>
+              The same VAE decoders were used across all domains, so the fingerprint exists
+              in the non-face images too. The models failed not because the signal was absent,
+              but because they learned it tangled up with what CelebA-HQ faces look like.
+              On unfamiliar image content, they had nothing to fall back on.
+            </p>
+          </div>
+          <div class="discovery-visual">
+            <img src="images/spectral/score_distributions.png"
+                 alt="Score distributions showing clear separation on faces but random overlap on non-face domains"
+                 class="zoomable" loading="lazy">
+            <p class="img-caption">Score distributions: clean separation on CelebA-HQ faces (top row),
+              random overlap on non-face domains (bottom row)</p>
+            <img src="images/results/cross_domain_overall.png"
+                 alt="Cross-domain accuracy near random chance for all four models"
+                 class="zoomable" loading="lazy"
+                 style="margin-top: 1.5rem;">
+            <p class="img-caption">All four architectures fall to near-chance accuracy on non-face
+              domains</p>
+          </div>
+        </div>
+
+        <!-- Evidence 4: GradCAM -->
+        <div class="discovery-step reverse reveal">
+          <div class="discovery-text">
+            <span class="step-number">Evidence 04</span>
+            <h3>Grad-CAM activation analysis</h3>
+            <p>
+              Grad-CAM (Gradient-weighted Class Activation Mapping) visualises which regions of an image
+              contribute most to the model's classification decision. If the classifiers had learned to
+              detect edits, activation should concentrate on the manipulated region: the lip, the ear,
+              or the nose.
+            </p>
+            <p>
+              However, the heatmaps show a different pattern. On edited images, activations are
+              distributed uniformly across the entire face, including unedited regions such as the
+              forehead, background, and clothing. On real (unedited) images, the activations are even
+              more diffuse, with no clear focal point.
+            </p>
+            <p>
+              This is consistent with the model responding to a global, full-image signal rather
+              than a localised manipulation. The spectral analysis below confirms that the VAE
+              fingerprint is distributed across the entire image, which accounts for the diffuse
+              attention pattern observed here.
+            </p>
+            <div class="insight-box">
+              <span class="insight-label">Key Insight</span>
+              <p>The uniform GradCAM activation pattern is consistent with a signal that is itself
+              uniformly distributed. The VAE fingerprint is present across the entire image, not
+              localised to the edit site, which explains the diffuse attention.</p>
+            </div>
+          </div>
+          <div class="discovery-visual">
+            <img src="images/gradcam/densenet121_gradcam.png"
+                 alt="GradCAM heatmaps showing DenseNet121 attends to entire image, not just edited regions"
+                 class="zoomable" loading="lazy">
+            <p class="img-caption">DenseNet121 Grad-CAM: edited faces (left 3) vs real faces (right 3).
+              Note the diffuse, whole-image activation pattern.</p>
+            <img src="images/gradcam/efficientnetv2_gradcam.png"
+                 alt="GradCAM heatmaps for EfficientNetV2-S showing same whole-image attention pattern"
+                 class="zoomable" loading="lazy"
+                 style="margin-top: 1.5rem;">
+            <p class="img-caption">EfficientNetV2-S shows the same pattern: attention is not localised
+              to the edited region in any model</p>
+          </div>
+        </div>
+
+        <!-- Evidence 5: Spectral analysis -->
+        <div class="discovery-step reveal">
+          <div class="discovery-text">
+            <span class="step-number">Evidence 05</span>
+            <h3>Spectral analysis of the VAE fingerprint</h3>
+            <p>
+              The preceding evidence points to a global signal, but does not identify it directly.
+              Azimuthally averaged Power Spectral Density (PSD) analysis addresses this by decomposing
+              images into their frequency components. The PSD curve shows how much energy an image
+              contains at each spatial frequency: low frequencies correspond to smooth gradients and
+              large-scale structures, while high frequencies capture fine detail, edges, and texture.
+            </p>
+            <p>
+              Comparing the PSD curves of real and VAE-decoded images reveals a systematic divergence.
+              The VAE decoder suppresses high-frequency content and introduces a characteristic spectral
+              rolloff. This shows up clearly in the residual PSD difference plot: the edited images
+              consistently lose energy in the high-frequency bands relative to their real counterparts.
+            </p>
+            <p>
+              This suppression pattern is consistent across all five diffusion models tested
+              (Stable Diffusion v4, v5, SDXL, OpenJourney, and Kandinsky 2.2), despite
+              differences in their VAE architectures. The decoders all rely on learned
+              convolutional upsampling to reconstruct images, and that reconstruction
+              process strips the stochastic noise patterns that real camera sensors produce.
+              This absence of natural noise is the signal that the CNNs learned to detect.
+            </p>
+            <div class="insight-box">
+              <span class="insight-label">Key Insight</span>
+              <p>The VAE decoder effectively acts as a low-pass filter, systematically attenuating
+              high-frequency detail. This spectral signature is not perceptible to the human eye but
+              is readily detectable by a CNN. Its presence across the entire image is consistent with
+              the other lines of evidence.</p>
+            </div>
+          </div>
+          <div class="discovery-visual">
+            <img src="images/spectral/spectral_psd_difference.png"
+                 alt="Spectral PSD difference showing VAE decoder attenuates high frequencies"
+                 class="zoomable" loading="lazy">
+            <p class="img-caption">Residual PSD difference (Edited - Real): the consistent
+              high-frequency suppression is the VAE fingerprint</p>
+            <img src="images/spectral/spectral_psd_comparison.png"
+                 alt="Raw PSD comparison of real vs edited images"
+                 class="zoomable" loading="lazy"
+                 style="margin-top: 1.5rem;">
+            <p class="img-caption">Raw PSD curves (real vs edited): the divergence is visible in both
+              CelebA-HQ faces and non-face domains, confirming the VAE origin</p>
+            <img src="images/spectral/spectral_example_celeb.png"
+                 alt="Frequency domain comparison of a real vs edited CelebA-HQ face"
+                 class="zoomable" loading="lazy"
+                 style="margin-top: 1.5rem;">
+            <p class="img-caption">Single example: the images are visually indistinguishable, but their
+              frequency spectra and noise residuals diverge significantly</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ==================== TECHNOLOGIES ==================== -->
+  <section class="section" id="tech">
+    <div class="container">
+      <span class="section-label reveal">04 // Technologies</span>
+      <h2 class="section-title reveal reveal-delay-1">Built with</h2>
+
+      <div class="tech-grid">
+        <div class="tech-card reveal">
+          <div class="tech-card-icon">CNN</div>
+          <h3>CNN Architectures</h3>
+          <p>Four pretrained models fine-tuned for binary classification on face inpainting detection.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">ConvNeXt-Tiny</span>
+            <span class="tech-tag">DenseNet121</span>
+            <span class="tech-tag">EfficientNetB0</span>
+            <span class="tech-tag">EfficientNetV2-S</span>
+          </div>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-1">
+          <div class="tech-card-icon">DL</div>
+          <h3>Deep Learning</h3>
+          <p>Training, evaluation, Grad-CAM visualisation, and spectral analysis pipeline.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">TensorFlow / Keras</span>
+            <span class="tech-tag">NumPy</span>
+            <span class="tech-tag">Matplotlib</span>
+            <span class="tech-tag">OpenCV</span>
+          </div>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-2">
+          <div class="tech-card-icon">DS</div>
+          <h3>Dataset</h3>
+          <p>CelebA-HQ faces with localised edits across multiple diffusion pipelines and edit techniques.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">Semi-Truths</span>
+            <span class="tech-tag">CelebA-HQ</span>
+            <span class="tech-tag">Inpainting</span>
+            <span class="tech-tag">Prompt-to-Prompt</span>
+          </div>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-3">
+          <div class="tech-card-icon">FFT</div>
+          <h3>Analysis Tools</h3>
+          <p>Frequency-domain spectral analysis, Grad-CAM attention mapping, and cross-domain evaluation.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">PSD Analysis</span>
+            <span class="tech-tag">Grad-CAM</span>
+            <span class="tech-tag">Scikit-learn</span>
+            <span class="tech-tag">Seaborn</span>
+          </div>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-4">
+          <div class="tech-card-icon">LDM</div>
+          <h3>Diffusion Models</h3>
+          <p>Five diffusion pipelines tested for generalisability of detection across model families.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">Stable Diffusion v4/v5</span>
+            <span class="tech-tag">SDXL</span>
+            <span class="tech-tag">OpenJourney</span>
+            <span class="tech-tag">Kandinsky 2.2</span>
+          </div>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-4">
+          <div class="tech-card-icon">GPU</div>
+          <h3>Infrastructure</h3>
+          <p>GPU-accelerated training and large-scale dataset preparation on cloud compute.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">Jupyter</span>
+            <span class="tech-tag">CUDA / GPU</span>
+            <span class="tech-tag">Python 3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-text">
+        &copy; 2025 · TU Dublin · AI/ML Thesis Project
+      </div>
+      <div class="footer-links">
+        <a href="#hero">Back to top</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lightbox overlay -->
+  <div class="lightbox" id="lightbox">
+    <img src="" alt="Enlarged view">
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
